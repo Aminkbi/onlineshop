@@ -1,4 +1,3 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
 
@@ -18,17 +17,73 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
-## Learn More
+# NexShop - Next.js Ecommerce Website
 
-To learn more about Next.js, take a look at the following resources:
+NexShop is a modern and stylish ecommerce website built using Next.js, TypeScript, and Tailwind CSS. It also utilizes DaisyUI for Tailwind CSS components. The website provides a seamless shopping experience with a unique sign-in logic that allows users to transfer their anonymous cart items to their account cart upon signing in with Google API.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Visit the live website: [https://nexshop.vercel.app](https://nexshop.vercel.app)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## Features
 
-## Deploy on Vercel
+- Browse and search for a wide range of products.
+- Add products to your cart in anonymous mode.
+- Sign in using Google API to sync your anonymous cart items to your account cart.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Technologies Used
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- Next.js: A powerful React framework for building server-side rendered and static websites.
+- TypeScript: A typed superset of JavaScript that helps improve code quality and maintainability.
+- Tailwind CSS: A utility-first CSS framework for building custom and responsive user interfaces.
+- DaisyUI: A plugin for Tailwind CSS that provides additional components and styling options.
+
+## Getting Started
+
+To get a local copy of the NexShop project up and running, follow these steps:
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/Aminkbi/nexshop.git
+cd nexshop
+```
+
+2. Install the dependencies:
+
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Set up environment variables:
+
+   - Create a `.env.local` file in the root directory.
+   - Add the required environment variables (example):
+
+   ```
+   GOOGLE_CLIENT_ID=your_google_api_client_id
+   ```
+
+   Replace `your_google_api_client_id` with the Google API client ID you obtain from the Google Developer Console.
+
+4. Run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+```
+
+5. Open your web browser and visit [http://localhost:3000](http://localhost:3000) to see the NexShop website in action.
+
+## Contributing
+
+Contributions to NexShop are welcome! If you find any issues or have suggestions for improvement, please feel free to create a pull request or open an issue on the GitHub repository.
+
+## License
+
+The NexShop project is open-source and available under the [MIT License](LICENSE).
+
+---
+
+Happy shopping with NexShop! 🛍️
