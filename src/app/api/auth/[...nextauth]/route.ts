@@ -19,8 +19,19 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    session({ session, user }) {
-      console.log(session, user);
+    async session({ session, user }) {
+       const getToken = await prisma.account.findFirst({
+        where: {
+          userId: user.id,
+        },
+      });
+
+      let accessToken: string | null = null;
+      if (getToken) {
+        accessToken = getToken.access_token!;
+      }
+      console.log(accessToken);
+      
       session.user.id = user.id;
       return session;
     },
