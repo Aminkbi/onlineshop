@@ -10,9 +10,10 @@ interface UserMenuButtonProps {
 
 export default function UserMenuButton({ session }: UserMenuButtonProps) {
   const user = session?.user;
+  console.log(session?.user.calendar);
 
   return (
-    <div className="dropdown-end dropdown">
+    <div className="dropdown dropdown-end">
       <label tabIndex={0} className="btn btn-circle btn-ghost">
         {user ? (
           <Image
