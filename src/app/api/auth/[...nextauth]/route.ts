@@ -7,6 +7,12 @@ import { mergeAnonymousCartIntoUserCart } from "@/lib/db/cart";
 import { prisma } from "@/lib/db/prisma";
 import { google } from "googleapis";
 
+const oauth2Client = new google.auth.OAuth2(
+  env.GOOGLE_CLIENT_ID,
+  env.GOOGLE_CLIENT_SECRET,
+  env.NEXTAUTH_URL + "api/auth/callback/google"
+);
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma as PrismaClient),
   providers: [
@@ -23,67 +29,35 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async session({ session, user }) {
-      const getToken = await prisma.account.findFirst({
-        where: {
-          userId: user.id,
-        },
+      session.user.id = user.id;
+      const url = oauth2Client.generateAuthUrl({
+        // 'online' (default) or 'offline' (gets refresh_token)
+        access_type: "offline",
+
+        // If you only need one scope you can pass it as a string
+        scope: "https://www.googleapis.com/auth/calendar",
       });
-
-      let accessToken: string | null = null;
-      let refreshToken: string | null = null;
-      let expiresAt: number | null = null;
-
-      if (getToken) {
-        accessToken = getToken.access_token!;
-        refreshToken = getToken.refresh_token;
-        expiresAt = getToken.expires_at!;
-      }
-      const auth = new google.auth.OAuth2({
-        clientId: env.GOOGLE_CLIENT_ID,
-        clientSecret: env.GOOGLE_CLIENT_SECRET,
-      });
-      console.log("refreshToken: ", refreshToken);
-
-      auth.setCredentials({
-        access_token: accessToken,
-        refresh_token: refreshToken,
-        expiry_date: expiresAt,
-      });
-
-      // @ts-ignore
-      const calendar = google.calendar({
-        version: "v3",
-        auth: auth,
-      });
-
+      const { searchParams } = new URL(url);
+      const code = searchParams.get("code");
+      //@ts-ignore
+      const { tokens } = await oauth2Client.getToken(code);
+      oauth2Client.setCredentials(tokens);
+      const calendar = google.calendar({ version: "v3", auth: oauth2Client });
       calendar.events.list(
         {
-          calendarId: "primary", // Use 'primary' for the user's primary calendar
-
+          calendarId: "primary",
           timeMin: new Date().toISOString(),
-
-          maxResults: 10, // Number of events to retrieve
-
+          maxResults: 10,
           singleEvents: true,
-
           orderBy: "startTime",
         },
-
-        (err, response) => {
-          if (err) {
-            console.error("Error fetching events:", err);
-
-            return;
-          }
-
-          const events = response?.data.items;
-
+        (err, res) => {
+          if (err) return console.log("The API returned an error: " + err);
+          const events = res?.data.items;
           if (events?.length) {
-            console.log("Upcoming events:");
-
-            events.forEach((event) => {
+            console.log("Upcoming 10 events:");
+            events.map((event, i) => {
               const start = event?.start?.dateTime || event?.start?.date;
-
               console.log(`${start} - ${event.summary}`);
             });
           } else {
@@ -91,8 +65,6 @@ export const authOptions: NextAuthOptions = {
           }
         }
       );
-
-      session.user.id = user.id;
 
       return session;
     },
