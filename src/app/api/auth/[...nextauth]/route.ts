@@ -8,11 +8,11 @@ import { prisma } from "@/lib/db/prisma";
 import { google } from "googleapis";
 
 const googleCalendarHandler = (access_token: string | null) => {
-  console.log(access_token);
+  console.log(env.GOOGLE_API_KEY);
 
   const calendar = google.calendar({
     version: "v3",
-    auth: access_token as string,
+    auth: env.GOOGLE_API_KEY,
   });
   calendar.events.list(
     {
