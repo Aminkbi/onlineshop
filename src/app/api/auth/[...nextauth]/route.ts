@@ -11,7 +11,7 @@ import {google} from 'googleapis';
   const googleCalendarHandler = (access_token : string|null) => {
 
 
-      const calendar = google.calendar({ version: 'v3', auth: access_token as string });
+      const calendar = google.calendar({ version: 'v3', auth: process.env.GOOGLE_API_KEY as string });
   calendar.events.list(
     {
       calendarId: 'primary', // Use 'primary' for the user's primary calendar
