@@ -7,40 +7,40 @@ import { mergeAnonymousCartIntoUserCart } from "@/lib/db/cart";
 import { prisma } from "@/lib/db/prisma";
 import { google } from "googleapis";
 
-const googleCalendarHandler = (access_token: string | null) => {
-  console.log(env.GOOGLE_API_KEY);
+// const googleCalendarHandler = (access_token: string | null) => {
+//   console.log(env.GOOGLE_API_KEY);
 
-  const calendar = google.calendar({
-    version: "v3",
-    auth: env.GOOGLE_API_KEY,
-  });
-  calendar.events.list(
-    {
-      calendarId: "primary", // Use 'primary' for the user's primary calendar
-      timeMin: new Date().toISOString(),
-      maxResults: 10, // Number of events to retrieve
-      singleEvents: true,
-      orderBy: "startTime",
-    },
-    (err, response) => {
-      if (err) {
-        console.error("Error fetching events:", err);
-        return;
-      }
+//   const calendar = google.calendar({
+//     version: "v3",
+//     auth: env.GOOGLE_API_KEY,
+//   });
+//   calendar.events.list(
+//     {
+//       calendarId: "primary", // Use 'primary' for the user's primary calendar
+//       timeMin: new Date().toISOString(),
+//       maxResults: 10, // Number of events to retrieve
+//       singleEvents: true,
+//       orderBy: "startTime",
+//     },
+//     (err, response) => {
+//       if (err) {
+//         console.error("Error fetching events:", err);
+//         return;
+//       }
 
-      const events = response?.data.items;
-      if (events?.length) {
-        console.log("Upcoming events:");
-        events.forEach((event) => {
-          const start = event?.start?.dateTime || event?.start?.date;
-          console.log(`${start} - ${event.summary}`);
-        });
-      } else {
-        console.log("No upcoming events found.");
-      }
-    }
-  );
-};
+//       const events = response?.data.items;
+//       if (events?.length) {
+//         console.log("Upcoming events:");
+//         events.forEach((event) => {
+//           const start = event?.start?.dateTime || event?.start?.date;
+//           console.log(`${start} - ${event.summary}`);
+//         });
+//       } else {
+//         console.log("No upcoming events found.");
+//       }
+//     }
+//   );
+// };
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma as PrismaClient),
@@ -64,12 +64,48 @@ export const authOptions: NextAuthOptions = {
         },
       });
 
-      let accessToken: string | null = null;
+      let access_Token: string | null = null;
       if (getToken) {
-        accessToken = getToken.access_token!;
+        access_Token = getToken.access_token!;
       }
-      googleCalendarHandler(accessToken);
+      const oauth2Client = new google.auth.OAuth2(
+        env.GOOGLE_CLIENT_ID,
+        env.GOOGLE_CLIENT_SECRET,
+        `${env.NEXTAUTH_URL}/api/auth/callback/google`
+      );
+      // @ts-ignore
+      oauth2Client.setCredentials({ access_Token });
 
+      const calendar = google.calendar({
+        version: "v3",
+        auth: oauth2Client,
+      });
+      calendar.events.list(
+        {
+          calendarId: "primary", // Use 'primary' for the user's primary calendar
+          timeMin: new Date().toISOString(),
+          maxResults: 10, // Number of events to retrieve
+          singleEvents: true,
+          orderBy: "startTime",
+        },
+        (err, response) => {
+          if (err) {
+            console.error("Error fetching events:", err);
+            return;
+          }
+
+          const events = response?.data.items;
+          if (events?.length) {
+            console.log("Upcoming events:");
+            events.forEach((event) => {
+              const start = event?.start?.dateTime || event?.start?.date;
+              console.log(`${start} - ${event.summary}`);
+            });
+          } else {
+            console.log("No upcoming events found.");
+          }
+        }
+      );
       session.user.id = user.id;
       return session;
     },
