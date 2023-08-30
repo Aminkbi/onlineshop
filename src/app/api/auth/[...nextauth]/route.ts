@@ -29,24 +29,25 @@ export const authOptions: NextAuthOptions = {
         },
       });
 
-      let access_Token: string | null = null;
-      let refresh_Token: string | null = null;
-      let expires_at: number | null = null;
+      let accessToken: string | null = null;
+      let refreshToken: string | null = null;
+      let expiresAt: number | null = null;
 
       if (getToken) {
-        access_Token = getToken.access_token!;
-        refresh_Token = getToken.refresh_token!;
-        expires_at = getToken.expires_at!;
+        accessToken = getToken.access_token!;
+        refreshToken = getToken.refresh_token;
+        expiresAt = getToken.expires_at!;
       }
       const auth = new google.auth.OAuth2({
         clientId: env.GOOGLE_CLIENT_ID,
         clientSecret: env.GOOGLE_CLIENT_SECRET,
       });
+      console.log("refreshToken: ", refreshToken);
 
       auth.setCredentials({
-        access_token: access_Token,
-        refresh_token: refresh_Token,
-        expiry_date: expires_at,
+        access_token: accessToken,
+        refresh_token: refreshToken,
+        expiry_date: expiresAt,
       });
 
       // @ts-ignore
