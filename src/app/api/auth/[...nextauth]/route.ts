@@ -20,6 +20,7 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     session({ session, user }) {
+      console.log(session, user);
       session.user.id = user.id;
       return session;
     },
