@@ -35,22 +35,10 @@ export const authOptions: NextAuthOptions = {
         access_Token = getToken.access_token!;
       }
 
-      const oauth2Client = new google.auth.OAuth2(
-        env.GOOGLE_CLIENT_ID,
-
-        env.GOOGLE_CLIENT_SECRET,
-
-        `${env.NEXTAUTH_URL}/api/auth/callback/google`
-      );
-
       // @ts-ignore
-
-      oauth2Client.setCredentials({ access_Token });
-
       const calendar = google.calendar({
         version: "v3",
-
-        auth: oauth2Client,
+        auth: access_Token,
       });
 
       calendar.events.list(
