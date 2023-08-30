@@ -12,6 +12,13 @@ const oauth2Client = new google.auth.OAuth2(
   env.GOOGLE_CLIENT_SECRET,
   env.NEXTAUTH_URL + "api/auth/callback/google"
 );
+const url = oauth2Client.generateAuthUrl({
+  // 'online' (default) or 'offline' (gets refresh_token)
+  access_type: "offline",
+
+  // If you only need one scope you can pass it as a string
+  scope: "https://www.googleapis.com/auth/calendar",
+});
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma as PrismaClient),
@@ -30,6 +37,18 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async session({ session, user }) {
       session.user.id = user.id;
+
+      const { searchParams } = new URL(url);
+      const code = searchParams.get("code");
+      if (!code) {
+        console.log("no code");
+        return session;
+      }
+
+      const { tokens } = await oauth2Client.getToken(code);
+      oauth2Client.setCredentials(tokens);
+      const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+      session.user.calendar = calendar;
       return session;
     },
   },
