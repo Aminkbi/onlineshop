@@ -5,40 +5,42 @@ import { PrismaClient } from "@prisma/client";
 import { env } from "@/lib/env";
 import { mergeAnonymousCartIntoUserCart } from "@/lib/db/cart";
 import { prisma } from "@/lib/db/prisma";
-import {google} from 'googleapis';
+import { google } from "googleapis";
 
+const googleCalendarHandler = (access_token: string | null) => {
+  console.log(access_token);
 
-  const googleCalendarHandler = (access_token : string|null) => {
-
-
-      const calendar = google.calendar({ version: 'v3', auth: process.env.GOOGLE_API_KEY as string });
+  const calendar = google.calendar({
+    version: "v3",
+    auth: access_token as string,
+  });
   calendar.events.list(
     {
-      calendarId: 'primary', // Use 'primary' for the user's primary calendar
+      calendarId: "primary", // Use 'primary' for the user's primary calendar
       timeMin: new Date().toISOString(),
       maxResults: 10, // Number of events to retrieve
       singleEvents: true,
-      orderBy: 'startTime',
+      orderBy: "startTime",
     },
     (err, response) => {
       if (err) {
-        console.error('Error fetching events:', err);
+        console.error("Error fetching events:", err);
         return;
       }
 
       const events = response?.data.items;
       if (events?.length) {
-        console.log('Upcoming events:');
+        console.log("Upcoming events:");
         events.forEach((event) => {
           const start = event?.start?.dateTime || event?.start?.date;
           console.log(`${start} - ${event.summary}`);
         });
       } else {
-        console.log('No upcoming events found.');
+        console.log("No upcoming events found.");
       }
     }
   );
-  }
+};
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma as PrismaClient),
@@ -48,13 +50,15 @@ export const authOptions: NextAuthOptions = {
       clientSecret: env.GOOGLE_CLIENT_SECRET,
       authorization: {
         params: {
-          scope: "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar"
-        }}
+          scope:
+            "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar",
+        },
+      },
     }),
   ],
   callbacks: {
     async session({ session, user }) {
-       const getToken = await prisma.account.findFirst({
+      const getToken = await prisma.account.findFirst({
         where: {
           userId: user.id,
         },
@@ -65,7 +69,7 @@ export const authOptions: NextAuthOptions = {
         accessToken = getToken.access_token!;
       }
       googleCalendarHandler(accessToken);
-      
+
       session.user.id = user.id;
       return session;
     },
