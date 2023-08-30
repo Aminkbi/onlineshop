@@ -10,7 +10,7 @@ interface UserMenuButtonProps {
 
 export default function UserMenuButton({ session }: UserMenuButtonProps) {
   const user = session?.user;
-  console.log(session?.user.calendar);
+  console.log("calendar:", user?.calendar);
 
   return (
     <div className="dropdown dropdown-end">
